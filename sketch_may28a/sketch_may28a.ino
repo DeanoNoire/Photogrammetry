@@ -1,17 +1,17 @@
 // Include the Arduino Stepper.h library:
 #include <Stepper.h>
-#include <TM1637.h>
 
 // Define number of steps per rotation:
 const int stepperPocetKroku = 44;
+const int stepperCelaOtocka = 2024;
 const int stepperSpeed = 50;
 const int stepperSpeedReset = 100;
-const int stepperDelay = 200;
+const int stepperDelay = 1000;
 int stepperPozice = 0;
 
 const int spoustPin = 12;
 const int spoustDelka = 600;
-const int spoustDelay = 50;
+const int spoustDelay = 4000;
 
 const int buttonPin = 3;
 int buttonState = 0;
@@ -21,11 +21,6 @@ int bezici = 0;
 int patro = 0;
 
 const int pocetPater = 0;
-
-const int ClkPin = 7;
-const int DioPin = 6;
-TM1637 tm(ClkPin,DioPin);
-
 
 
 // Wiring:
@@ -58,7 +53,7 @@ void Beh(){
 }
 
 void Levelcheck(){
-  if(stepperPozice == 440){
+  if(stepperPozice == stepperCelaOtocka){
        stepperPozice = 0;
        Levelup();
   }
@@ -84,12 +79,6 @@ void Reset(){
   myStepper.setSpeed(stepperSpeed);
 }
 
-void displayNumber(int num){
-    tm.display(3, num % 10);   
-    tm.display(2, num / 10 % 10);   
-    tm.display(1, num / 100 % 10);   
-    tm.display(0, num / 1000 % 10);
-}
 
 void setup() {
   myStepper.setSpeed(stepperSpeed);
@@ -99,8 +88,6 @@ void setup() {
   digitalWrite(spoustPin,HIGH);
   Serial.begin(9600);
 
-  tm.init();
-  tm.set(1);
 }
 
 void loop() {
@@ -116,7 +103,6 @@ void loop() {
     else {
       Serial.println("Konec");
       bezici = 0;
-      displayNumber(0000);
       delay(1000);
       Reset();
     }
@@ -125,6 +111,5 @@ void loop() {
   
   if(bezici == 1){
       Beh();
-      displayNumber(patro*1000 + (stepperPozice)/22);
   }
 } 
