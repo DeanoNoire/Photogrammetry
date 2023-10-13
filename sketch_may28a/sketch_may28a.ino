@@ -1,36 +1,46 @@
 // Include the Arduino Stepper.h library:
 #include <Stepper.h>
 
+int bezici = 1;
 // Define number of steps per rotation:
-const int stepperPocetKroku = 44;
-const int stepperCelaOtocka = 2024;
-const int stepperSpeed = 50;
-const int stepperSpeedReset = 100;
-const int stepperDelay = 1000;
-int stepperPozice = 0;
+const int stepperTalirPocetKroku = 44;
+const int stepperTalirCelaOtocka = 2024;
+const int stepperTalirSpeed = 50;
+const int stepperTalirDelay = 1000;
+int stepperTalirPozice = 0;
+
+const int stepperZebrikPocetKroku = 44;
+const int stepperZebrikCelaOtocka = 2024;
+const int stepperZebrikSpeed = 50;
+const int stepperZebrikDelay = 1000;
+int stepperZebrikPozice = 0;
 
 const int spoustPin = 12;
 const int spoustDelka = 600;
 const int spoustDelay = 4000;
 
-const int buttonPin = 3;
-int buttonState = 0;
+const int pocetPater = 3;
 
-int bezici = 0;
+const int endstopPin = 2;
 
-int patro = 0;
-
-const int pocetPater = 0;
 
 
 // Wiring:
+// talir
 // Pin 8 to IN1 on the ULN2003 driver
 // Pin 9 to IN2 on the ULN2003 driver
 // Pin 10 to IN3 on the ULN2003 driver
 // Pin 11 to IN4 on the ULN2003 driver
 
+// Pin 4 to IN1 on the ULN2003 driver
+// Pin 5 to IN2 on the ULN2003 driver
+// Pin 6 to IN3 on the ULN2003 driver
+// Pin 7 to IN4 on the ULN2003 driver
+
+
 // Create stepper object called 'myStepper', note the pin order:
-Stepper myStepper = Stepper(stepperPocetKroku, 8, 10, 9, 11);
+Stepper stepperTalir = Stepper(stepperTalirPocetKroku, 8, 10, 9, 11);
+Stepper stepperZebrik = Stepper(stepperZebrikPocetKroku, 4, 6, 5, 7);
 
 void Spoust() {
   digitalWrite(spoustPin,LOW);
@@ -40,50 +50,57 @@ void Spoust() {
 }
 
 void Otocka(){
-  myStepper.step(stepperPocetKroku);
-  stepperPozice = stepperPozice + stepperPocetKroku;
-  delay(stepperDelay);
+  stepperTalir.step(stepperTalirPocetKroku);
+  steppertalirPozice = stepperTalirPozice + stepperTalirPocetKroku;
+  delay(stepperTalirDelay);
 }
 
 void Beh(){
-    Serial.println(stepperPozice);
+    Serial.println(stepperTalirPozice);
     Otocka();  
     Spoust();
     Levelcheck();
 }
 
 void Levelcheck(){
-  if(stepperPozice == stepperCelaOtocka){
-       stepperPozice = 0;
+  if(stepperTalirPozice == stepperTalirCelaOtocka){
+       stepperTalirPozice = 0;
        Levelup();
   }
+}
 
-
+void Homing(){
+  int endStopState;
+  do {
+    endStopState = digitalRead(endstopPin);
+    if(endStopState == LOW){
+      stepper.setSpeed(0);
+      bezici = 0;
+    } else {
+       stepperZebrik.step(-1);
+    }
+  } while (endstopState != LOW);
+  
 }
 
 void Levelup(){
     if(patro < pocetPater){
+      stepperZebrik.step(stepperZebrikPocetKroku);
       patro = patro + 1;  
+      delay(stepperZebrikDelay);
     }
     if(patro == pocetPater){
-    bezici = 0;  
+      Homing();
     }
   }
 
 
 
-void Reset(){
-  myStepper.setSpeed(stepperSpeedReset);
-  myStepper.step(-stepperPozice);
-  stepperPozice = 0;
-  myStepper.setSpeed(stepperSpeed);
-}
-
 
 void setup() {
-  myStepper.setSpeed(stepperSpeed);
-  pinMode(buttonPin, INPUT);
+  stepperTalir.setSpeed(stepperTalirSpeed);
   pinMode(spoustPin,OUTPUT);
+  pinMode(endstopPin, INPUT_PULLUP);
 
   digitalWrite(spoustPin,HIGH);
   Serial.begin(9600);
@@ -91,25 +108,10 @@ void setup() {
 }
 
 void loop() {
-  buttonState = digitalRead(buttonPin);
-
-  
-  if (buttonState == HIGH) {
-    if (bezici == 0){
-      Serial.println("Start");
-      bezici = 1;
-      delay(1000);
-    }
-    else {
-      Serial.println("Konec");
-      bezici = 0;
-      delay(1000);
-      Reset();
-    }
-    
-  } 
-  
-  if(bezici == 1){
-      Beh();
+  if(bezici == 1) {
+    Homing();
+    Beh();
   }
+  
+
 } 
