@@ -16,7 +16,7 @@ Kabel pro krokový motor Nema 17 s konektorem dupont 1m
 Krokový motor 28BYJ-48
 
 
-Zapínání zapojením do sítě (tlačítko nahradit koncákem - stačí signal a ground?)? 
+Zapínání zapojením do sítě (tlačítko nahradit koncákem - stačí signal a ground?)? Funkce resetu tedy ztrácí význam.
 Oboje by mělo utáhnout 28BYJ-48 motory.
 
 
